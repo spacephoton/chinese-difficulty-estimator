@@ -12,6 +12,8 @@ function App() {
   const [input, setInput] = useState<string>("");
   const [characters, setCharacters] = useState([]);
   const [results, setResults] = useState(<h2>results</h2>);
+  const [difficulty, setDifficulty] = useState("0");
+  const [frequencies, setFrequencies] = useState<any[]>([]);
 
   const handleChange = (event: any) => {
     const value = event.target.value;
@@ -26,24 +28,49 @@ function App() {
 
   useEffect(() => {
     const newChars = Array.from(input);
-    const charItems = newChars.map((character) => {
-      if (!hanCharacter.test(character)) return "";
-      console.log(hanzi.decompose(character));
-      const frequency = hanzi.getCharacterFrequency(character);
-      if (frequency) {
-        return (
-          <ListGroup.Item>
-            <h3>
-              {character} - {frequency.number}
-            </h3>
-          </ListGroup.Item>
-        );
-      } else {
-        return <ListGroup.Item>"English"</ListGroup.Item>;
-      }
+    // const charItems = newChars.map((character) => {
+    //   if (!hanCharacter.test(character)) return "";
+    //   console.log(hanzi.decompose(character));
+    //   const frequency = hanzi.getCharacterFrequency(character);
+    //   if (frequency) {
+    //     return (
+    //       <ListGroup.Item>
+    //         <h3>
+    //           {character} - {frequency.number}
+    //         </h3>
+    //       </ListGroup.Item>
+    //     );
+    //   } else {
+    //     return <ListGroup.Item>"English"</ListGroup.Item>;
+    //   }
+    // });
+
+    const newFrequencies = newChars
+      .filter((character) => {
+        if (!hanCharacter.test(character)) return false;
+        return true;
+      })
+      .map((character) => {
+        return hanzi.getCharacterFrequency(character);
+      });
+    if (newFrequencies.length > 0) {
+      setFrequencies(newFrequencies);
+    }
+    // setResults(<ListGroup>{charItems}</ListGroup>);
+  }, [input]);
+
+  useEffect(() => {
+    const charItems = frequencies.map((frequency) => {
+      return (
+        <ListGroup.Item>
+          <h3>
+            {frequency.character} - {frequency.number}
+          </h3>
+        </ListGroup.Item>
+      );
     });
     setResults(<ListGroup>{charItems}</ListGroup>);
-  }, [input]);
+  }, [frequencies]);
 
   return (
     <div className="App">
