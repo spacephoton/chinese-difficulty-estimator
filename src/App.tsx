@@ -4,6 +4,9 @@ import Form from "react-bootstrap/Form";
 import ListGroup from "react-bootstrap/ListGroup";
 import Jumbotron from "react-bootstrap/Jumbotron";
 import "bootstrap/dist/css/bootstrap.min.css";
+import hanzi from "hanzi";
+
+const hanCharacter = new RegExp("[\u4E00-\u9FCC]");
 
 function App() {
   const [input, setInput] = useState<string>("");
@@ -18,10 +21,27 @@ function App() {
   };
 
   useEffect(() => {
+    hanzi.start();
+  }, []);
+
+  useEffect(() => {
     const newChars = Array.from(input);
-    const charItems = newChars.map((character) => (
-      <ListGroup.Item>{character}</ListGroup.Item>
-    ));
+    const charItems = newChars.map((character) => {
+      if (!hanCharacter.test(character)) return "";
+      console.log(hanzi.decompose(character));
+      const frequency = hanzi.getCharacterFrequency(character);
+      if (frequency) {
+        return (
+          <ListGroup.Item>
+            <h3>
+              {character} - {frequency.number}
+            </h3>
+          </ListGroup.Item>
+        );
+      } else {
+        return <ListGroup.Item>"English"</ListGroup.Item>;
+      }
+    });
     setResults(<ListGroup>{charItems}</ListGroup>);
   }, [input]);
 
