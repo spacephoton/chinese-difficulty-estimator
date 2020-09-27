@@ -1,6 +1,6 @@
 self.__precacheManifest = (self.__precacheManifest || []).concat([
   {
-    "revision": "831cfca68057534e7947f6cd30bd29c1",
+    "revision": "5dd155b5fbd51e56705aaf82957fc740",
     "url": "/chinese-difficulty-estimator/index.html"
   },
   {
@@ -8,7 +8,7 @@ self.__precacheManifest = (self.__precacheManifest || []).concat([
     "url": "/chinese-difficulty-estimator/static/css/2.d9ad5f5c.chunk.css"
   },
   {
-    "revision": "b322738935a84c5fb8c8",
+    "revision": "018f2e04a8aa9fe236df",
     "url": "/chinese-difficulty-estimator/static/css/main.5f361e03.chunk.css"
   },
   {
@@ -20,8 +20,8 @@ self.__precacheManifest = (self.__precacheManifest || []).concat([
     "url": "/chinese-difficulty-estimator/static/js/2.a609092a.chunk.js.LICENSE.txt"
   },
   {
-    "revision": "b322738935a84c5fb8c8",
-    "url": "/chinese-difficulty-estimator/static/js/main.ec69346b.chunk.js"
+    "revision": "018f2e04a8aa9fe236df",
+    "url": "/chinese-difficulty-estimator/static/js/main.48ae98e7.chunk.js"
   },
   {
     "revision": "25bdff3c2c56f0f12362",
