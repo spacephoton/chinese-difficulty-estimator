@@ -29,23 +29,53 @@ type Frequency = {
   meaning: string;
 };
 
+// const getHsk = (frequencyNumber: number | string): number => {
+//   if (typeof frequencyNumber === "string")
+//     frequencyNumber = parseInt(frequencyNumber);
+//   if (frequencyNumber <= 178) return 1;
+//   if (frequencyNumber <= 485) return 2;
+//   if (frequencyNumber <= 623) return 3;
+//   if (frequencyNumber <= 1071) return 4;
+//   if (frequencyNumber <= 1709) return 5;
+//   if (frequencyNumber <= 2633) return 6;
+//   return 7;
+// };
+
 const getHsk = (frequencyNumber: number | string): number => {
   if (typeof frequencyNumber === "string")
     frequencyNumber = parseInt(frequencyNumber);
-  if (frequencyNumber <= 178) return 1;
-  if (frequencyNumber <= 485) return 2;
-  if (frequencyNumber <= 623) return 3;
-  if (frequencyNumber <= 1071) return 4;
-  if (frequencyNumber <= 1709) return 5;
-  if (frequencyNumber <= 2633) return 6;
-  return 7;
+  if (frequencyNumber <= 300) return 1;
+  if (frequencyNumber <= 600) return 2;
+  if (frequencyNumber <= 1200) return 3;
+  if (frequencyNumber <= 2500) return 4;
+  if (frequencyNumber <= 5000) return 5;
+  return 6;
+};
+
+const levelToCEFR = (level: number): string => {
+  switch (level) {
+    case 1:
+      return "A1";
+    case 2:
+      return "A2";
+    case 3:
+      return "B1";
+    case 4:
+      return "B2";
+    case 5:
+      return "C1";
+    case 6:
+      return "C2";
+    default:
+      return "C2";
+  }
 };
 
 //assumes it is sorted
 const getHskData = (wordFrequencies: Frequency[]) => {
   let results = [];
   let wordsAtLevel: { [level: number]: number } = {};
-  for (let i = 1; i <= 7; i++) {
+  for (let i = 1; i < 7; i++) {
     wordsAtLevel[i] = 0;
   }
   wordFrequencies.map((f: Frequency) => {
@@ -53,9 +83,9 @@ const getHskData = (wordFrequencies: Frequency[]) => {
   });
 
   //add to data
-  for (let i = 1; i <= 7; i++) {
+  for (let i = 1; i < 7; i++) {
     results.push({
-      name: "HSK " + i,
+      name: levelToCEFR(i),
       words: wordsAtLevel[i],
     });
   }
@@ -70,10 +100,11 @@ function App() {
   const [frequencies, setFrequencies] = useState<Frequency[]>([]);
   const [chartData, setChartData] = useState<DataEntry[]>([
     {
-      name: "HSK 1",
+      name: "Level 1",
       words: 10,
     },
   ]);
+  const [highlight, setHighlight] = useState<number>();
 
   const handleChange = (event: any) => {
     const value = event.target.value;
@@ -114,18 +145,16 @@ function App() {
   }, [words]);
 
   useEffect(() => {
-    //update chart data
-    let newData = [];
-
     //update frequency table
     const wordItems = frequencies.map((frequency: Frequency) => {
+      const level = getHsk(frequency.number);
       const popover = (
         <Popover id="popover-basic">
           <Popover.Title as="h3">
             {frequency.character} {frequency.pinyin}
           </Popover.Title>
           <Popover.Content>
-            Frequency: {frequency.number} (HSK {getHsk(frequency.number)})
+            Frequency: {frequency.number} ({levelToCEFR(level)})
           </Popover.Content>
           <Popover.Content>Meaning: {frequency.meaning}</Popover.Content>
         </Popover>
@@ -138,7 +167,11 @@ function App() {
             placement="auto-start"
             overlay={popover}
           >
-            <Card>
+            <Card
+              style={{
+                backgroundColor: highlight === level ? "#3498db" : "",
+              }}
+            >
               <Card.Body>
                 <Card.Title style={{ fontSize: "3rem" }}>
                   {frequency.character}
@@ -165,32 +198,40 @@ function App() {
     }
 
     setChartData(getHskData(frequencies));
-  }, [frequencies]);
+  }, [frequencies, highlight]);
 
   return (
     <div className="App">
       <Jumbotron className="center">
         {/* <h1>How difficult?:</h1> */}
-        <Form>
-          <Form.Group controlId="sentence">
-            <Form.Control
-              size="lg"
-              type="text"
-              value={input}
-              onChange={handleChange}
-              placeholder="Enter sentence"
-              maxLength={40}
-              // style={{ maxWidth: "20rem", justifySelf: "center" }}
-            />
-          </Form.Group>
-        </Form>
-        <h3>
-          Overall difficulty:{" "}
-          {difficulty ? "HSK " + getHsk(parseInt(difficulty)) : "n/a"}{" "}
-        </h3>
-        <InteractiveChart data={chartData} />
-        <WordsTable />
-        {results}
+        <Container fluid>
+          <Row className="justify-content-md-center">
+            <Col md={12} xl={8}>
+              <Form>
+                <Form.Group controlId="sentence">
+                  <Form.Control
+                    size="lg"
+                    type="text"
+                    value={input}
+                    onChange={handleChange}
+                    placeholder="Enter sentence"
+                    maxLength={40}
+                    // style={{ maxWidth: "20rem", justifySelf: "center" }}
+                  />
+                </Form.Group>
+              </Form>
+              <h3>
+                Overall difficulty:{" "}
+                {difficulty
+                  ? "CEFR " + levelToCEFR(getHsk(parseInt(difficulty)))
+                  : "n/a"}{" "}
+              </h3>
+              <InteractiveChart data={chartData} setHighlight={setHighlight} />
+              <WordsTable />
+              {results}
+            </Col>
+          </Row>
+        </Container>
       </Jumbotron>
     </div>
   );
