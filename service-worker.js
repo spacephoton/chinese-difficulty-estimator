@@ -14,7 +14,7 @@
 importScripts("https://storage.googleapis.com/workbox-cdn/releases/4.3.1/workbox-sw.js");
 
 importScripts(
-  "/chinese-difficulty-estimator/precache-manifest.5defc6d3688d05003e3d03843a53007e.js"
+  "/chinese-difficulty-estimator/precache-manifest.7e8efe8beebb071711f86fa9ad05ba3a.js"
 );
 
 self.addEventListener('message', (event) => {
