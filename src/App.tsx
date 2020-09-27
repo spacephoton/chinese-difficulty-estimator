@@ -161,7 +161,16 @@ function App() {
       );
 
       return (
-        <Col xs={3} md={3} lg={2} key={frequency.number}>
+        <Col
+          xs={3}
+          md={3}
+          lg={2}
+          key={frequency.number}
+          style={{
+            paddingLeft: 0,
+            paddingRight: 0,
+          }}
+        >
           <OverlayTrigger
             trigger={["click", "hover"]}
             placement="auto-start"
@@ -173,7 +182,7 @@ function App() {
               }}
             >
               <Card.Body>
-                <Card.Title style={{ fontSize: "3rem" }}>
+                <Card.Title style={{ fontSize: "2.5rem" }}>
                   {frequency.character}
                 </Card.Title>
                 {/* <Card.Text>{frequency.meaning}</Card.Text> */}
