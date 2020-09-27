@@ -1,12 +1,20 @@
 import React, { useEffect, useRef, useState } from "react";
+import "bootstrap/dist/css/bootstrap.min.css";
 import "./App.css";
 import Form from "react-bootstrap/Form";
 import ListGroup from "react-bootstrap/ListGroup";
 import Jumbotron from "react-bootstrap/Jumbotron";
-import "bootstrap/dist/css/bootstrap.min.css";
+import Container from "react-bootstrap/Container";
+import Popover from "react-bootstrap/Popover";
+import PopoverContent from "react-bootstrap/PopoverContent";
+import Row from "react-bootstrap/Row";
+import Col from "react-bootstrap/Col";
+import Card from "react-bootstrap/Card";
+import OverlayTrigger from "react-bootstrap/OverlayTrigger";
 import hanzi from "hanzi";
 import * as _ from "lodash";
-import InteractiveChart, { DataEntry } from "./components/interactiveChart";
+import InteractiveChart, { DataEntry } from "./components/InteractiveChart";
+import WordsTable from "./components/WordsTable";
 
 const hanCharacter = new RegExp("[\u4E00-\u9FCC]");
 //what percentile of easiest words should be the sentence difficulty
@@ -17,6 +25,7 @@ type Frequency = {
   character: string;
   count: string;
   percentage: number;
+  pinyin: string;
   meaning: string;
 };
 
@@ -54,7 +63,7 @@ const getHskData = (wordFrequencies: Frequency[]) => {
 };
 
 function App() {
-  const [input, setInput] = useState<string>("来得及");
+  const [input, setInput] = useState<string>("番茄西红柿北方");
   const [words, setWords] = useState<string[]>([]);
   const [results, setResults] = useState(<h2></h2>);
   const [difficulty, setDifficulty] = useState<string | undefined>(undefined);
@@ -110,18 +119,42 @@ function App() {
 
     //update frequency table
     const wordItems = frequencies.map((frequency: Frequency) => {
+      const popover = (
+        <Popover id="popover-basic">
+          <Popover.Title as="h3">
+            {frequency.character} {frequency.pinyin}
+          </Popover.Title>
+          <Popover.Content>
+            Frequency: {frequency.number} (HSK {getHsk(frequency.number)})
+          </Popover.Content>
+          <Popover.Content>Meaning: {frequency.meaning}</Popover.Content>
+        </Popover>
+      );
+
       return (
-        <ListGroup.Item key={frequency.number}>
-          <h3>
-            {frequency.character} - {frequency.number}{" "}
-            {"(HSK " + getHsk(parseInt(frequency.number)) + ")"}
-            {/* {Math.floor(frequency.percentage)}% */}
-          </h3>
-          <h5>{frequency.meaning}</h5>
-        </ListGroup.Item>
+        <Col xs={3} md={3} lg={2} key={frequency.number}>
+          <OverlayTrigger
+            trigger={["click", "hover"]}
+            placement="auto-start"
+            overlay={popover}
+          >
+            <Card>
+              <Card.Body>
+                <Card.Title style={{ fontSize: "3rem" }}>
+                  {frequency.character}
+                </Card.Title>
+                {/* <Card.Text>{frequency.meaning}</Card.Text> */}
+              </Card.Body>
+            </Card>
+          </OverlayTrigger>
+        </Col>
       );
     });
-    setResults(<ListGroup>{wordItems}</ListGroup>);
+    setResults(
+      <Container fluid>
+        <Row>{wordItems}</Row>
+      </Container>
+    );
 
     //update difficulty
     if (frequencies.length > 0) {
@@ -156,6 +189,7 @@ function App() {
           {difficulty ? "HSK " + getHsk(parseInt(difficulty)) : "n/a"}{" "}
         </h3>
         <InteractiveChart data={chartData} />
+        <WordsTable />
         {results}
       </Jumbotron>
     </div>

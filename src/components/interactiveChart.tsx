@@ -20,10 +20,17 @@ type ChartProps = {
   data: DataEntry[];
 };
 const InteractiveChart = ({ data }: ChartProps) => {
-  const [allActive, setAllActive] = useState<boolean>(false);
+  const [allActive, setAllActive] = useState<boolean>(true);
   const [activeIndex, setActiveIndex] = useState<Number>(0);
 
-  const handleHover = (data: any, index: any) => {};
+  const handleMouseOver = (data: any, index: any) => {
+    setActiveIndex(index);
+    setAllActive(false);
+  };
+
+  const handleMouseOut = (data: any, index: any) => {
+    setAllActive(true);
+  };
 
   return (
     <>
@@ -38,13 +45,16 @@ const InteractiveChart = ({ data }: ChartProps) => {
           // ticks={["3", "2", "1", 4, "5", "", "7"]}
         />
         <YAxis interval={1} allowDecimals={false} hide={true} />
-        <Tooltip />
-        <Legend />
-        <Bar dataKey="words">
+        {/* <Tooltip /> */}
+        <Bar
+          dataKey="words"
+          onMouseOver={handleMouseOver}
+          onMouseOut={handleMouseOut}
+        >
           {data.map((entry, index) => (
             <Cell
               cursor="pointer"
-              fill={index === activeIndex || allActive ? "#2980b9" : "#3498db"}
+              fill={index === activeIndex || allActive ? "#2980b9" : "#bdc3c7"}
               key={`cell-${index}`}
             ></Cell>
           ))}
