@@ -59,7 +59,7 @@ const InteractiveChart = ({ data, setHighlight }: ChartProps) => {
             onMouseEnter={handleMouseEnter}
           >
             {data.map((entry, index) => {
-              console.log(entry)
+              // console.log(entry)
               const color = levelToColor(entry.level)
               return (<Cell
                 cursor="pointer"

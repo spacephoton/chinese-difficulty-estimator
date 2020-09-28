@@ -242,7 +242,7 @@ function App() {
                   : "n/a"}{" "}
               </h3>
               <InteractiveChart data={chartData} setHighlight={setHighlight} />
-              <WordsTable />
+              {/* <WordsTable /> */}
               {results}
             </Col>
           </Row>
