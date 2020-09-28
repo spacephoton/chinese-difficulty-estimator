@@ -15,6 +15,7 @@ import hanzi from "hanzi";
 import * as _ from "lodash";
 import InteractiveChart, { DataEntry } from "./components/InteractiveChart";
 import WordsTable from "./components/WordsTable";
+import { colors, levelToColor } from "./tools/colors"
 
 const hanCharacter = new RegExp("[\u4E00-\u9FCC]");
 //what percentile of easiest words should be the sentence difficulty
@@ -71,6 +72,7 @@ const levelToCEFR = (level: number): string => {
   }
 };
 
+
 //assumes it is sorted
 const getHskData = (wordFrequencies: Frequency[]) => {
   let results = [];
@@ -87,6 +89,7 @@ const getHskData = (wordFrequencies: Frequency[]) => {
     results.push({
       name: levelToCEFR(i),
       words: wordsAtLevel[i],
+      level: i,
     });
   }
   return results;
@@ -102,6 +105,7 @@ function App() {
     {
       name: "Level 1",
       words: 10,
+      level: 1,
     },
   ]);
   const [highlight, setHighlight] = useState<number>();
@@ -148,6 +152,7 @@ function App() {
     //update frequency table
     const wordItems = frequencies.map((frequency: Frequency) => {
       const level = getHsk(frequency.number);
+      const wordColor = levelToColor(level);
       const popover = (
         <Popover id="popover-basic">
           <Popover.Title as="h3">
@@ -178,7 +183,8 @@ function App() {
           >
             <Card
               style={{
-                backgroundColor: highlight === level ? "#3498db" : "",
+                backgroundColor: highlight === level ? colors.active : wordColor,
+                color: highlight === level ? colors.activeText : "#2c3e50",
               }}
             >
               <Card.Body>
@@ -225,7 +231,7 @@ function App() {
                     onChange={handleChange}
                     placeholder="Enter sentence"
                     maxLength={40}
-                    // style={{ maxWidth: "20rem", justifySelf: "center" }}
+                  // style={{ maxWidth: "20rem", justifySelf: "center" }}
                   />
                 </Form.Group>
               </Form>
