@@ -50,6 +50,7 @@ const maxCharFrequencyInWord = (word: string): Frequency => {
   let pinyin = maxFrequency.pinyin;
   for (var i = 1; i < word.length; i++) {
     const newFrequency = hanzi.getCharacterFrequency(word.charAt(i));
+    if (newFrequency === "Character not found") break;
     pinyin += newFrequency.pinyin;
     maxFrequency =
       newFrequency.number < maxFrequency.number ? newFrequency : maxFrequency;
@@ -58,7 +59,6 @@ const maxCharFrequencyInWord = (word: string): Frequency => {
   const dict = hanzi.definitionLookup(word)[0];
   maxFrequency.pinyin = dict.pinyin;
   maxFrequency.meaning = dict.definition;
-  console.log("max freq is", maxFrequency);
   return maxFrequency;
 };
 
@@ -150,7 +150,10 @@ function App() {
   useEffect(() => {
     const newFrequencies: Frequency[] = words
       .filter((word) => {
-        if (!hanCharacter.test(word.charAt(0))) {
+        if (
+          !hanCharacter.test(word.charAt(0)) ||
+          hanzi.getCharacterFrequency(word.charAt(0)) === "Character not found"
+        ) {
           return false;
         }
         return true;
@@ -240,24 +243,29 @@ function App() {
               <Container fluid>
                 <Row className="justify-content-md-center">
                   <Col md={12} xl={8}>
-                    <Form>
+                    <Form
+                      onSubmit={(e: any) => {
+                        e.preventDefault();
+                      }}
+                    >
+                      <h3>
+                        {difficulty
+                          ? "CEFR " + levelToCEFR(getHsk(parseInt(difficulty)))
+                          : "n/a"}{" "}
+                      </h3>
                       <Form.Group controlId="sentence">
                         <Form.Control
+                          as="textarea"
                           size="lg"
                           type="text"
                           value={input}
                           onChange={handleChange}
                           placeholder="Enter sentence"
-                          maxLength={40}
+                          maxLength={10000}
+                          autoComplete="off"
                         />
                       </Form.Group>
                     </Form>
-                    <h3>
-                      Overall difficulty:{" "}
-                      {difficulty
-                        ? "CEFR " + levelToCEFR(getHsk(parseInt(difficulty)))
-                        : "n/a"}{" "}
-                    </h3>
                     <InteractiveChart
                       data={chartData}
                       setHighlight={setHighlight}
