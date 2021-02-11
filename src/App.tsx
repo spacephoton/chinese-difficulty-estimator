@@ -15,7 +15,14 @@ import hanzi from "hanzi";
 import * as _ from "lodash";
 import InteractiveChart, { DataEntry } from "./components/InteractiveChart";
 import WordsTable from "./components/WordsTable";
-import { colors, levelToColor } from "./tools/colors"
+import { colors, levelToColor } from "./tools/colors";
+import {
+  BrowserRouter as Router,
+  Switch,
+  Route,
+  Link,
+  useParams,
+} from "react-router-dom";
 
 const hanCharacter = new RegExp("[\u4E00-\u9FCC]");
 //what percentile of easiest words should be the sentence difficulty
@@ -30,17 +37,30 @@ type Frequency = {
   meaning: string;
 };
 
-// const getHsk = (frequencyNumber: number | string): number => {
-//   if (typeof frequencyNumber === "string")
-//     frequencyNumber = parseInt(frequencyNumber);
-//   if (frequencyNumber <= 178) return 1;
-//   if (frequencyNumber <= 485) return 2;
-//   if (frequencyNumber <= 623) return 3;
-//   if (frequencyNumber <= 1071) return 4;
-//   if (frequencyNumber <= 1709) return 5;
-//   if (frequencyNumber <= 2633) return 6;
-//   return 7;
+// type DefinitionFrequency = {
+//   definition: string;
+//   pinyin: string;
+//   simplified: string;
+//   traditional: string;
+//   number: string;
 // };
+
+const maxCharFrequencyInWord = (word: string): Frequency => {
+  let maxFrequency = hanzi.getCharacterFrequency(word.charAt(0));
+  let pinyin = maxFrequency.pinyin;
+  for (var i = 1; i < word.length; i++) {
+    const newFrequency = hanzi.getCharacterFrequency(word.charAt(i));
+    pinyin += newFrequency.pinyin;
+    maxFrequency =
+      newFrequency.number < maxFrequency.number ? newFrequency : maxFrequency;
+  }
+  maxFrequency.character = word;
+  const dict = hanzi.definitionLookup(word)[0];
+  maxFrequency.pinyin = dict.pinyin;
+  maxFrequency.meaning = dict.definition;
+  console.log("max freq is", maxFrequency);
+  return maxFrequency;
+};
 
 const getHsk = (frequencyNumber: number | string): number => {
   if (typeof frequencyNumber === "string")
@@ -71,7 +91,6 @@ const levelToCEFR = (level: number): string => {
       return "C2";
   }
 };
-
 
 //assumes it is sorted
 const getHskData = (wordFrequencies: Frequency[]) => {
@@ -122,22 +141,22 @@ function App() {
   }, []);
 
   useEffect(() => {
-    const newWords: string[] = _.uniqBy(Array.from(input), (e) => e);
-    // const newWords: string[] = hanzi.segment(input);
+    // const newWords: string[] = _.uniqBy(Array.from(input), (e) => e);
+    const newWords = hanzi.segment(input);
+    // console.log("words set to ", newWords);
     setWords(newWords);
   }, [input]);
 
   useEffect(() => {
     const newFrequencies: Frequency[] = words
       .filter((word) => {
-        if (!hanCharacter.test(word)) {
-          setFrequencies([]);
+        if (!hanCharacter.test(word.charAt(0))) {
           return false;
         }
         return true;
       })
       .map((word) => {
-        return hanzi.getCharacterFrequency(word);
+        return maxCharFrequencyInWord(word);
       });
     const orderedFrequencies = _.sortBy(newFrequencies, (f: Frequency) =>
       parseInt(f.number)
@@ -149,7 +168,6 @@ function App() {
   }, [words]);
 
   useEffect(() => {
-    //update frequency table
     const wordItems = frequencies.map((frequency: Frequency) => {
       const level = getHsk(frequency.number);
       const wordColor = levelToColor(level);
@@ -159,7 +177,7 @@ function App() {
             {frequency.character} {frequency.pinyin}
           </Popover.Title>
           <Popover.Content>
-            Frequency: {frequency.number} ({levelToCEFR(level)})
+            Frequency: ±{frequency.number} ({levelToCEFR(level)})
           </Popover.Content>
           <Popover.Content>Meaning: {frequency.meaning}</Popover.Content>
         </Popover>
@@ -183,7 +201,8 @@ function App() {
           >
             <Card
               style={{
-                backgroundColor: highlight === level ? colors.active : wordColor,
+                backgroundColor:
+                  highlight === level ? colors.active : wordColor,
                 color: highlight === level ? colors.activeText : "#2c3e50",
               }}
             >
@@ -204,7 +223,6 @@ function App() {
       </Container>
     );
 
-    //update difficulty
     if (frequencies.length > 0) {
       const id = Math.floor(frequencies.length * DIFFICULTY_THRESHOLD - 1);
       if (frequencies[id]) setDifficulty(frequencies[id].number);
@@ -216,39 +234,46 @@ function App() {
   }, [frequencies, highlight]);
 
   return (
-    <div className="App">
-      <Jumbotron className="center">
-        {/* <h1>How difficult?:</h1> */}
-        <Container fluid>
-          <Row className="justify-content-md-center">
-            <Col md={12} xl={8}>
-              <Form>
-                <Form.Group controlId="sentence">
-                  <Form.Control
-                    size="lg"
-                    type="text"
-                    value={input}
-                    onChange={handleChange}
-                    placeholder="Enter sentence"
-                    maxLength={40}
-                  // style={{ maxWidth: "20rem", justifySelf: "center" }}
-                  />
-                </Form.Group>
-              </Form>
-              <h3>
-                Overall difficulty:{" "}
-                {difficulty
-                  ? "CEFR " + levelToCEFR(getHsk(parseInt(difficulty)))
-                  : "n/a"}{" "}
-              </h3>
-              <InteractiveChart data={chartData} setHighlight={setHighlight} />
-              {/* <WordsTable /> */}
-              {results}
-            </Col>
-          </Row>
-        </Container>
-      </Jumbotron>
-    </div>
+    <Router>
+      <Switch>
+        <Route path="/">
+          <div className="App">
+            <Jumbotron className="center">
+              <Container fluid>
+                <Row className="justify-content-md-center">
+                  <Col md={12} xl={8}>
+                    <Form>
+                      <Form.Group controlId="sentence">
+                        <Form.Control
+                          size="lg"
+                          type="text"
+                          value={input}
+                          onChange={handleChange}
+                          placeholder="Enter sentence"
+                          maxLength={40}
+                        />
+                      </Form.Group>
+                    </Form>
+                    <h3>
+                      Overall difficulty:{" "}
+                      {difficulty
+                        ? "CEFR " + levelToCEFR(getHsk(parseInt(difficulty)))
+                        : "n/a"}{" "}
+                    </h3>
+                    <InteractiveChart
+                      data={chartData}
+                      setHighlight={setHighlight}
+                    />
+                    {results}
+                  </Col>
+                </Row>
+              </Container>
+            </Jumbotron>
+          </div>
+        </Route>
+        <Route path="/2"></Route>
+      </Switch>
+    </Router>
   );
 }
 
