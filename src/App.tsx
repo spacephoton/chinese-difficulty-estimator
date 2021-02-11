@@ -173,13 +173,11 @@ function App() {
       const wordColor = levelToColor(level);
       const popover = (
         <Popover id="popover-basic">
-          <Popover.Title as="h3">
-            {frequency.character} {frequency.pinyin}
-          </Popover.Title>
-          <Popover.Content>
+          <Popover.Title as="h3">{frequency.pinyin}</Popover.Title>
+          {/* <Popover.Content>
             Frequency: ±{frequency.number} ({levelToCEFR(level)})
-          </Popover.Content>
-          <Popover.Content>Meaning: {frequency.meaning}</Popover.Content>
+          </Popover.Content> */}
+          <Popover.Content>{frequency.meaning}</Popover.Content>
         </Popover>
       );
 
